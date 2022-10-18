@@ -70,20 +70,26 @@
       </div>
     </div>
 
-    <div id="contact" class="p-4">
+    <div id="contact" class=" bg-light p-4">
       <div class="row justify-content-center mt-3 mb-3">
 
-        <div class="col-lg-4">
+        <div v-if="show_contact == true" class="col-lg-4">
           <h2>Have any questions?</h2>
           <p>Contact us by filling  information below</p>
 
-          <form>
+          <div v-if="contact_notice !== ''" class="alert alert-warning">
+            There was a problem submitting your message. {{contact_notice}}
+          </div>
+
+          <form @submit.prevent="sendContactMessage()">
             <div  class="form-group text left">
-              <input type="email"
+              <input v-model="contact_email"
+                    type="email"
                     class="form-control"
                     placeholder="Enter your email"
               />
-              <textarea class="form-control mt-3"
+              <textarea v-model="contact_message"
+                        class="form-control mt-3"
                         placeholder="Enter your message"
                         rows="5"
               />
@@ -91,15 +97,60 @@
             <button type="submit" class="btn btn-warning mt-3">Send</button>
           </form>
         </div>
+
+        <div v-else>
+          <h3>Message successfuly sent.</h3>
+          <p>Thank you for contacting us, we'll back to you as soon as possible</p>
+        </div>
+
       </div>
     </div>
 
-    <div id="footer"></div>
+    <div id="footer" class=" p-4">
+      <footer class="text-light p-4">
+        <small>&copy; 2022, Embraceme</small>
+      </footer>
+    </div>
   </div>
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      show_contact: true,
+      contact_email: '',
+      contact_message: '',
+      contact_notice: ''
+    }
+  },
+
+  methods: {
+    sendContactMessage() {
+      if(!this.validEmail(this.contact_email)) {
+        this.contact_notice="The email address is not valid"
+      } 
+      else if(this.contact_message.length<10) {
+        this.contact_message = 'Your message is too short'
+      }
+      else {
+        const url = `https://us-central1-embraceme-fc7be.cloudfunctions.net/sendEmail?email_from=${this.contact_email}&message=${this.contact_message}`
+        console.log(url)
+        const requestOptions = {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        };
+        fetch(url, requestOptions);
+        this.show_contact = false;
+      }
+    },
+
+    validEmail(email) {
+      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
+    }
+  }
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -129,6 +180,10 @@ export default {};
 #store-link img {
   /* margin-bottom: -24px; */
   max-height: 72px;
+}
+
+#footer {
+  background-color: rgb(28, 18, 55);
 }
 
 @media screen and (max-width: 1100px) {
