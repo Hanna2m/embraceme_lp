@@ -1,16 +1,15 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
-// const { isEmailIdentifier } = require("firebase-admin/lib/auth/identifier");
 admin.initializeApp();
 
 let  transporter = nodemailer.createTransport({
   host: "smtp.sendgrid.net",
   port: 587,
-  secure: false, // true for 465, false for other ports
+  secure: false,
   auth: {
     user: "apikey",
-    pass: "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"
+    pass: process.env.ACCESS_KEY_SENDGRID
   },
 });
 
